@@ -167,11 +167,22 @@
         const form = event.target;
         const formData = new FormData(form);
 
+        const headers = new Headers();
+        headers.append('Accept', 'application/json');
+
         fetch(form.action, {
-            method: 'POST',
+            method: form.method, 
             body: formData,
+            headers: headers
+        }
+        .then(response => {
+        // You MUST check if the response is OK before parsing as JSON
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error('Form submission failed.');
+        }
         })
-        .then(response => response.json())
         .then(data => {
             const confirmationMessage = document.getElementById('confirmation-message');
             const feedbackForm = document.getElementById('feedback-form');
@@ -217,3 +228,4 @@
     });
 
 </script>
+
