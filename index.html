@@ -132,8 +132,7 @@
                 </div>
             </a>
         </div>
-</body>
-</html>
+
 <div class="feedback-section mt-12 w-full text-left">
     <h2 class="text-2xl font-bold text-gray-800 mb-4">Have feedback?</h2>
     <p class="text-sm text-gray-600 mb-4">Let us know what you think! We appreciate your suggestions.</p>
@@ -166,68 +165,61 @@
 
         const form = event.target;
         const formData = new FormData(form);
+        const confirmationMessage = document.getElementById('confirmation-message');
+        const messageText = confirmationMessage.querySelector('span');
 
         const headers = new Headers();
         headers.append('Accept', 'application/json');
 
         fetch(form.action, {
-            method: form.method, 
-            body: formData,
-            headers: headers
-        }
-        .then(response => {
-        // You MUST check if the response is OK before parsing as JSON
-        if (response.ok) {
-            return response.json();
-        } else {
-            throw new Error('Form submission failed.');
-        }
-        })
-        .then(data => {
-            const confirmationMessage = document.getElementById('confirmation-message');
-            const feedbackForm = document.getElementById('feedback-form');
-            const messageText = confirmationMessage.querySelector('span');
+                method: form.method,
+                body: formData,
+                headers: headers
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    // This will trigger the .catch() block below
+                    throw new Error('Form submission failed.');
+                }
+            })
+            .then(data => {
+                // This block now only runs on a successful submission
+                confirmationMessage.classList.remove('bg-red-100', 'border-red-400', 'text-red-700');
+                confirmationMessage.classList.add('bg-green-100', 'border-green-400', 'text-green-700');
+                confirmationMessage.querySelector('strong').textContent = 'Thank you!';
+                messageText.textContent = ' Your feedback has been sent.';
+                
+                form.reset();
+                form.classList.add('hidden');
+                confirmationMessage.classList.remove('hidden');
 
-            if (data.ok) { 
-            confirmationMessage.classList.remove('bg-red-100', 'border-red-400', 'text-red-700');
-            confirmationMessage.classList.add('bg-green-100', 'border-green-400', 'text-green-700');
-            messageText.textContent = ` Your feedback has been sent.`;
-            feedbackForm.reset();}
-            else {
+                setTimeout(() => {
+                    confirmationMessage.classList.add('hidden');
+                    form.classList.remove('hidden');
+                }, 5000);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                
                 confirmationMessage.classList.remove('bg-green-100', 'border-green-400', 'text-green-700');
                 confirmationMessage.classList.add('bg-red-100', 'border-red-400', 'text-red-700');
-                messageText.textContent = ` ${data.message}`;
-            }
+                confirmationMessage.querySelector('strong').textContent = 'Oops!';
+                messageText.textContent = ' An error occurred. Please try again.';
 
-            feedbackForm.classList.add('hidden');
-            confirmationMessage.classList.remove('hidden');
+                form.classList.add('hidden');
+                confirmationMessage.classList.remove('hidden');
 
-            setTimeout(() => {
-                confirmationMessage.classList.add('hidden');
-                feedbackForm.classList.remove('hidden');
-            }, 5000); // Hide message and show form again after 5 seconds
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            // Handle network or other errors here
-            const confirmationMessage = document.getElementById('confirmation-message');
-            const feedbackForm = document.getElementById('feedback-form');)
-
-            confirmationMessage.classList.remove('bg-green-100', 'border-green-400', 'text-green-700');
-            confirmationMessage.classList.add('bg-red-100', 'border-red-400', 'text-red-700');
-            confirmationMessage.querySelector('span').textContent = ` An error occurred. Please try again.`;
-
-            feedbackForm.classList.add('hidden');
-            confirmationMessage.classList.remove('hidden');
-
-            setTimeout(() => {
-                confirmationMessage.classList.add('hidden');
-                feedbackForm.classList.remove('hidden');
-            }, 5000);
-        });
+                setTimeout(() => {
+                    confirmationMessage.classList.add('hidden');
+                    form.classList.remove('hidden');
+                }, 5000);
+            });
     });
-
 </script>
+</body>
+</html>
 
 
 
