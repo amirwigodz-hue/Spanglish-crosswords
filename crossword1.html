@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crossword Number 1</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the crossword grid */
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column; /* Changed to column to stack header and content */
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+         
+        .crossword-grid {
+            display: grid;
+            /* Grid columns will be set dynamically by JS based on gridSize.cols */
+            grid-template-columns: repeat(10, minmax(0, 1fr)); /* 10 columns */
+            gap: 1px; /* Gap between cells */
+            border: 2px solid #374151; /* Darker border for the overall grid */
+            border-radius: 8px; /* Rounded corners for the grid container */
+            overflow: hidden; /* Ensures rounded corners are visible */
+            max-width: fit-content; /* Adjusts to content width */
+            margin: 0 auto; /* Center the grid */
+        }
+
+        .crossword-cell {
+            width: 90px; /* Increased width for each cell to accommodate longer clues */
+            height: 35px; /* Rectangular height for each cell */
+            display: flex;
+            flex-direction: column; /* Stack clue text and input vertically */
+            justify-content: center;
+            align-items: center;
+            background-color: #ffffff; /* White background for playable cells */
+            border: 1px solid #d1d5db; /* Light border for individual cells */
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #1f2937; /* Dark text color */
+            position: relative; /* For positioning content, crucial for pseudo-elements and z-index */
+            border-radius: 4px; /* Slightly rounded corners for cells */
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+            overflow: hidden; /* Reverted to original overflow */
+        }
+
+        .crossword-cell.black {
+            background-color: #1f2937; /* Black background for non-playable cells */
+            border: 1px solid #1f2937; /* Match border to background */
+        }
+
+        /* Styles for Clue Cells (the starting cell of a word) */
+        .crossword-cell.clue-only-cell {
+            background-color: #e0f2fe; /* Light blue background for clue cells */
+            color: #1e40af; /* Darker blue text for clues */
+            font-size: 0.65em; /* Smaller font for the clue word */
+            text-align: center;
+            flex-direction: row; /* Keep clue text and arrow inline */
+            padding: 2px;
+            box-sizing: border-box;
+            line-height: 1;
+            white-space: nowrap; /* Prevent text from wrapping */
+            overflow: hidden; /* Hide overflow if it still happens */
+            text-overflow: ellipsis; /* Add ellipsis if text overflows after nowrap */
+            width: 100%; /* Take full width of cell */
+            height: 100%; /* Take full height of cell */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .clue-only-cell .arrow-icon {
+            width: 16px; /* Size of the arrow icon */
+            height: 16px;
+            color: #1e40af; /* Arrow color */
+            margin-left: 4px; /* Space between clue text and arrow */
+            flex-shrink: 0; /* Prevent arrow from shrinking */
+        }
+
+        /* Styles for Answer Cells (where letters are typed) */
+        .crossword-cell.answer-cell input {
+            width: 100%;
+            height: 100%;
+            text-align: center; /* Centers the letter horizontally */
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 1.1rem;
+            font-weight: inherit;
+            text-transform: inherit;
+            color: inherit;
+            padding: 0;
+            margin: 0;
+            caret-color: transparent;
+            flex-grow: 1;
+            box-sizing: border-box;
+            line-height: 35px; /* Centers the letter vertically by matching the cell's height */
+        }
+
+        .crossword-cell.highlight-active {
+            background-color: #bfdbfe !important; /* Light blue for active cell, ensures override */
+            border-color: #3b82f6; /* Blue border for active cell */
+        }
+
+        .crossword-cell.correct {
+            background-color: #dcfce7; /* Light green for correct cells */
+            border-color: #22c55e; /* Green border for correct cells */
+        }
+
+        .crossword-cell.incorrect {
+            background-color: #fee2e2; /* Light red for incorrect cells */
+            border-color: #ef4444; /* Red border for incorrect cells */
+        }
+
+        /* New style for the currently typing cell */
+        .crossword-cell.current-active-cell {
+            border-top: 2px solid #ff9800 !important;
+            border-bottom: 2px solid #ff9800 !important;
+            /* Using inset box-shadows for a consistent 2px border on all sides */
+            box-shadow: inset 2px 0 0 0 #ff9800,    /* Left inset "border" */
+                        inset -2px 0 0 0 #ff9800,   /* Right inset "border" */
+                        0 0 0 2px rgba(255, 152, 0, 0.5); /* Outer orange glow */
+            /* Ensure no default borders interfere */
+            border-left: none !important;
+            border-right: none !important;
+            z-index: 10; /* Ensure the active cell is on top */
+        }
+
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .crossword-cell {
+                width: 60px; /* Adjusted for smaller screens */
+                height: 30px;
+            }
+            .crossword-cell.clue-only-cell {
+                font-size: 0.6em;
+            }
+            .clue-only-cell .arrow-icon {
+                width: 14px;
+                height: 14px;
+            }
+            .crossword-cell.answer-cell input {
+                font-size: 1rem;
+                line-height: 30px; /* Adjust line-height for responsive height */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .crossword-cell {
+                width: 45px; /* Adjusted for smallest screens */
+                height: 25px;
+            }
+            .clue-only-cell .arrow-icon {
+                font-size: 0.55em;
+            }
+            .clue-only-cell .arrow-icon {
+                width: 12px;
+                height: 12px;
+            }
+            .crossword-grid {
+                width: 100%; /* Allow grid to take full width and handle overflow */
+                overflow-x: auto; /* Enable horizontal scrolling if cells are too wide */
+            }
+            .crossword-cell.answer-cell input {
+                line-height: 25px; /* Adjust line-height for responsive height */
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="container mx-auto p-6 bg-white shadow-xl rounded-xl flex flex-col items-center max-w-4xl">
+        <h1 class="text-4xl font-extrabold text-gray-800 mb-8 text-center tracking-tight">Crossword Number 1</h1>
+
+
+        <div id="crossword-container" class="flex flex-col lg:flex-row gap-8 w-full justify-center items-start">
+            <div class="crossword-grid flex-shrink-0" id="crossword-grid">
+                <!-- Crossword cells will be generated here by JavaScript -->
+            </div>
+        </div>
+
+        <div class="controls mt-8 flex flex-wrap justify-center gap-4">
+            <button id="check-button" class="px-8 py-3 bg-indigo-600 text-white font-semibold rounded-full shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 transition transform hover:scale-105">
+                Check Puzzle
+            </button>
+            <button id="clear-button" class="px-8 py-3 bg-red-500 text-white font-semibold rounded-full shadow-lg hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-400 focus:ring-opacity-50 transition transform hover:scale-105">
+                Clear Puzzle
+            </button>
+        </div>
+
+        <!-- Custom Message Box -->
+        <div id="message-box" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
+            <div class="bg-white p-8 rounded-lg shadow-2xl max-w-sm w-full text-center">
+                <h3 id="message-title" class="text-2xl font-bold mb-4 text-gray-800"></h3>
+                <p id="message-content" class="text-gray-700 mb-6"></p>
+                <button id="message-close-button" class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 transition">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Define the crossword data: grid size, and words with their clues and answer letters.
+        // Each object in 'words' represents a single word (rectangle) on the grid.
+        const crosswordData = {
+            gridSize: { rows: 16, cols: 10 }, // 16 rows, 10 columns
+            words: [
+                // Original words
+                { spanish: "sol", english: "sun", startRow: 0, startCol: 0, direction: "down" },
+                { spanish: "escuela", english: "school", startRow: 0, startCol: 2, direction: "down" },
+                { spanish: "guía", english: "guide", startRow: 0, startCol: 3, direction: "down" },
+                { spanish: "gratis", english: "free", startRow: 0, startCol: 4, direction: "across" },
+                { spanish: "ciudad", english: "city", startRow: 0, startCol: 9, direction: "down" },
+                // Words from previous update
+                { spanish: "vino", english: "wine", startRow: 1, startCol: 4, direction: "across" },
+                { spanish: "cultura", english: "culture", startRow: 2, startCol: 1, direction: "across" },
+                { spanish: "ajo", english: "garlic", startRow: 3, startCol: 1, direction: "down" },
+                { spanish: "tocar", english: "touch", startRow: 3, startCol: 5, direction: "down" },
+                { spanish: "respuesta", english: "answer", startRow: 3, startCol: 6, direction: "down" },
+                // Newly added words
+                { spanish: "sonrisa", english: "smile", startRow: 3, startCol: 7, direction: "down" },
+                { spanish: "boleto", english: "ticket", startRow: 3, startCol: 8, direction: "down" },
+                { spanish: "dios", english: "god", startRow: 4, startCol: 0, direction: "across" },
+                { spanish: "rico", english: "tasty", startRow: 4, startCol: 4, direction: "across" },
+                { spanish: "dos", english: "two", startRow: 5, startCol: 0, direction: "down" },
+                { spanish: "película", english: "movie", startRow: 5, startCol: 4, direction: "down" },
+                { spanish: "cuchara", english: "spoon", startRow: 5, startCol: 9, direction: "down" },
+                // Words from current user request
+                { spanish: "música", english: "music", startRow: 6, startCol: 3, direction: "across" },
+                { spanish: "blanco", english: "white", startRow: 7, startCol: 2, direction: "down" },
+                { spanish: "fiesta", english: "party", startRow: 7, startCol: 3, direction: "down" },
+                // New words from this update
+                { spanish: "silla", english: "chair", startRow: 9, startCol: 0, direction: "across" },
+                { spanish: "a", english: "to", startRow: 9, startCol: 7, direction: "across" },
+                { spanish: "fuego", english: "fire", startRow: 10, startCol: 0, direction: "across" },
+                { spanish: "abierto", english: "open", startRow: 10, startCol: 5, direction: "across" },
+                { spanish: "saber", english: "know", startRow: 11, startCol: 1, direction: "down" },
+                // Words from the last user request (now integrated into this version)
+                { spanish: "lluvia", english: "rain", startRow: 11, startCol: 5, direction: "down" },
+                { spanish: "ganar", english: "earn", startRow: 11, startCol: 8, direction: "down" },
+                { spanish: "arroz", english: "rice", startRow: 11, startCol: 9, direction: "down" },
+                // NEW WORDS ADDED FROM YOUR MOST RECENT REQUEST
+                { spanish: "llave", english: "key", startRow: 12, startCol: 0, direction: "across"},
+                { spanish: "río", english: "river", startRow: 12, startCol: 4, direction: "across"},
+                { spanish: "ahora", english: "now", startRow: 13, startCol: 0, direction: "across"},
+                { spanish: "aire", english: "air", startRow: 13, startCol: 4, direction: "across"},
+                { spanish: "aceite", english: "oil", startRow: 14, startCol: 0, direction: "across"},
+                { spanish: "hielo", english: "ice", startRow: 14, startCol: 4, direction: "across"},
+                { spanish: "mujer", english: "woman", startRow: 15, startCol: 0, direction: "across"},
+                { spanish: "uno", english: "one", startRow: 15, startCol: 6, direction: "across"} 
+            ]
+        };
+
+        // Global variables for game state
+        let gridCellData = Array(crosswordData.gridSize.rows).fill(null).map(() => Array(crosswordData.gridSize.cols).fill(null));
+        let activeCell = null; // Currently focused input element
+        let activeRow = -1;
+        let activeCol = -1;
+        let activeDirection = "across"; // Default direction for generic movement
+        let activeWordIndex = -1; // Index of the currently active word from crosswordData.words
+
+        // DOM element references
+        const gridContainer = document.getElementById("crossword-grid");
+        const checkButton = document.getElementById("check-button");
+        const clearButton = document.getElementById("clear-button");
+        const messageBox = document.getElementById("message-box");
+        const messageTitle = document.getElementById("message-title");
+        const messageContent = document.getElementById("message-content");
+        const messageCloseButton = document.getElementById("message-close-button"); // Corrected assignment
+
+        /**
+         * Initializes the crossword grid and sets up cells.
+         * This function is called when the DOM is fully loaded.
+         */
+        document.addEventListener("DOMContentLoaded", () => {
+            createGrid();
+            setupCells();
+            addEventListeners();
+            // Set grid-template-columns dynamically based on the number of columns
+            gridContainer.style.gridTemplateColumns = `repeat(${crosswordData.gridSize.cols}, minmax(0, 1fr))`;
+        });
+
+        /**
+         * Creates the HTML grid structure and initializes the gridCellData array.
+         * Each cell is represented by a div.
+         */
+        function createGrid() {
+            gridContainer.innerHTML = ""; // Clear existing grid
+            // Initialize gridCellData with 'black' type for all cells initially
+            for (let r = 0; r < crosswordData.gridSize.rows; r++) {
+                for (let c = 0; c < crosswordData.gridSize.cols; c++) {
+                    const cellDiv = document.createElement("div");
+                    cellDiv.classList.add("crossword-cell");
+                    cellDiv.dataset.row = r;
+                    cellDiv.dataset.col = c;
+                    cellDiv.classList.add("black"); // All cells start as black
+
+                    gridContainer.appendChild(cellDiv);
+                    gridCellData[r][c] = {
+                        type: 'black', // Default type: 'black', 'clue-only', or 'answer'
+                        value: '',     // User input
+                        answer: '',    // Correct answer letter for this cell
+                        wordRefs: [],  // [{ wordIndex, letterIndex }] - refers to English word letters
+                        isClueStart: false, // Is this cell the start of a Spanish word clue?
+                        clueText: '',       // Spanish clue text if isClueStart
+                        clueDirection: '',  // Direction of the clue if isClueStart
+                        isLocked: false     // New property: true if word is correctly filled and locked
+                    };
+                }
+            }
+        }
+
+        /**
+         * Sets up clue and answer cells based on the crosswordData.words array.
+         * Renders clues and inputs appropriately and populates gridCellData.
+         */
+        function setupCells() {
+            // First pass: Mark clue cells and populate answer cells
+            crosswordData.words.forEach((wordObj, wordIndex) => {
+                const { spanish, english, startRow, startCol, direction } = wordObj;
+
+                // Handle the clue cell
+                const clueR = startRow;
+                const clueC = startCol;
+                if (clueR >= 0 && clueR < crosswordData.gridSize.rows && clueC >= 0 && clueC < crosswordData.gridSize.cols) {
+                    const cellDiv = gridContainer.children[clueR * crosswordData.gridSize.cols + clueC];
+                    gridCellData[clueR][clueC].type = 'clue-only'; // This cell is only for the clue
+                    gridCellData[clueR][clueC].isClueStart = true;
+                    gridCellData[clueR][clueC].clueText = spanish.toUpperCase();
+                    gridCellData[clueR][clueC].clueDirection = direction;
+
+                    cellDiv.classList.remove("black");
+                    cellDiv.classList.add("clue-only-cell"); // Add specific class for clue-only cells
+
+                    // Add clue display elements
+                    const clueDisplayDiv = document.createElement("div");
+                    clueDisplayDiv.classList.add("clue-display");
+                    clueDisplayDiv.textContent = spanish.toUpperCase();
+
+                    const arrowSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                    arrowSvg.setAttribute("class", `arrow-icon ${direction}-arrow`);
+                    arrowSvg.setAttribute("viewBox", "0 0 24 24");
+                    arrowSvg.setAttribute("fill", "currentColor");
+                    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    if (direction === "down") {
+                        path.setAttribute("d", "M12 16.0001L7 11.0001L17 11.0001L12 16.0001Z");
+                    } else if (direction === "across") {
+                        path.setAttribute("d", "M16.0001 12L11.0001 7L11.0001 17L16.0001 12Z");
+                    }
+                    arrowSvg.appendChild(path);
+                    clueDisplayDiv.appendChild(arrowSvg);
+                    cellDiv.appendChild(clueDisplayDiv); // Append to the clue cell
+                }
+
+                // Handle the answer cells (English word letters)
+                for (let i = 0; i < english.length; i++) {
+                    let answerR = startRow;
+                    let answerC = startCol;
+
+                    if (direction === "across") {
+                        answerC += (i + 1); // English word starts one cell after the clue
+                    } else { // direction === "down"
+                        answerR += (i + 1); // English word starts one cell after the clue
+                    }
+
+                    // Ensure coordinates are within grid bounds
+                    if (answerR >= 0 && answerR < crosswordData.gridSize.rows && answerC >= 0 && answerC < crosswordData.gridSize.cols) {
+                        const cellDiv = gridContainer.children[answerR * crosswordData.gridSize.cols + answerC];
+
+                        // Mark as an answer cell (it will be playable)
+                        cellDiv.classList.remove("black");
+                        cellDiv.classList.add("answer-cell");
+
+                        // Update gridCellData for this cell
+                        gridCellData[answerR][answerC].type = 'answer';
+                        gridCellData[answerR][answerC].answer = english[i].toUpperCase();
+                        gridCellData[answerR][answerC].wordRefs.push({ wordIndex: wordIndex, letterIndex: i });
+
+                        // Only create an input element if one doesn't already exist in this cell
+                        if (!cellDiv.querySelector('input')) {
+                            let input = document.createElement("input");
+                            input.type = "text";
+                            input.maxLength = "1";
+                            input.dataset.row = answerR;
+                            input.dataset.col = answerC;
+                            input.tabIndex = -1; // Managed by JS for navigation
+                            cellDiv.appendChild(input);
+                        }
+                    }
+                }
+            });
+        }
+
+
+        /**
+         * Adds all necessary event listeners to the grid cells and buttons.
+         */
+        function addEventListeners() {
+            gridContainer.addEventListener("click", handleCellClick);
+            gridContainer.addEventListener("input", handleInput); // Keep for paste or other non-keypress input methods
+            gridContainer.addEventListener("keydown", handleKeyDown);
+            checkButton.addEventListener("click", checkAllCells);
+            clearButton.addEventListener("click", clearGrid);
+            messageCloseButton.addEventListener("click", hideMessage);
+        }
+
+        /**
+         * Handles click events on crossword cells.
+         * Sets the active cell and highlights it based on word or single cell.
+         * @param {Event} event - The click event.
+         */
+        function handleCellClick(event) {
+            const target = event.target.closest(".crossword-cell");
+            if (!target) return;
+
+            const row = parseInt(target.dataset.row);
+            const col = parseInt(target.dataset.col);
+            const cellData = gridCellData[row][col];
+
+            // If the cell is locked, do not allow it to be active or highlighted.
+            if (cellData.isLocked) {
+                console.log(`[handleCellClick] Cell (${row}, ${col}) is locked. Cannot activate.`);
+                return;
+            }
+
+            clearHighlights(); // Clear all previous highlights
+
+            if (cellData.isClueStart) {
+                // If a clue cell is clicked, activate that specific word
+                const clueWordRef = crosswordData.words.findIndex(word =>
+                    word.startRow === row && word.startCol === col
+                );
+                if (clueWordRef !== -1) {
+                    activeWordIndex = clueWordRef;
+                    activeDirection = crosswordData.words[activeWordIndex].direction;
+                    updateHighlight(activeWordIndex); // Highlight the entire word
+
+                    // Find and focus the first *answer* cell of this word that is not locked
+                    const wordObj = crosswordData.words[activeWordIndex];
+                    let firstEditableCellCoords = null;
+                    for (let i = 0; i < wordObj.english.length; i++) {
+                        const coords = getAnswerCellCoords(activeWordIndex, i);
+                        if (coords) {
+                            const currentCellData = gridCellData[coords.row][coords.col];
+                            if (!currentCellData.isLocked) {
+                                firstEditableCellCoords = coords;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (firstEditableCellCoords) {
+                        focusCell(firstEditableCellCoords.row, firstEditableCellCoords.col);
+                    } else {
+                        // If the entire word is already locked, clear active state
+                        activeCell = null;
+                        activeRow = -1;
+                        activeCol = -1;
+                        activeWordIndex = -1;
+                        clearHighlights();
+                    }
+                }
+            } else if (cellData.type === "answer") {
+                // If an answer cell is clicked directly
+                if (cellData.wordRefs && cellData.wordRefs.length > 0) {
+                    // Try to keep the active word if the clicked cell is part of it
+                    let foundActiveWord = false;
+                    if (activeWordIndex !== -1) {
+                        for (const ref of cellData.wordRefs) {
+                            if (ref.wordIndex === activeWordIndex) {
+                                foundActiveWord = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!foundActiveWord) {
+                        // If no active word, or current cell not part of active word, pick a new active word
+                        // Prioritize words matching the current activeDirection, otherwise just take the first one
+                        let preferredWordRef = cellData.wordRefs.find(ref => crosswordData.words[ref.wordIndex].direction === activeDirection);
+                        if (!preferredWordRef) {
+                            preferredWordRef = cellData.wordRefs[0]; // Fallback to first word
+                        }
+                        activeWordIndex = preferredWordRef.wordIndex; // Corrected: should be wordIndex
+                        activeDirection = crosswordData.words[activeWordIndex].direction;
+                    }
+                    updateHighlight(activeWordIndex); // Highlight the chosen word
+                } else {
+                    activeWordIndex = -1; // No active word
+                }
+                focusCell(row, col); // Always focus the clicked cell
+            } else {
+                // If a black cell is clicked, clear all active state
+                activeCell = null;
+                activeRow = -1;
+                activeCol = -1;
+                activeWordIndex = -1;
+                clearHighlights();
+            }
+        }
+
+        /**
+         * Helper to get the coordinates of the Nth letter of an English word.
+         * @param {number} wordIndex - The index of the word in crosswordData.words.
+         * @param {number} letterIndex - The 0-based index of the letter within the English word.
+         * @returns {object|null} An object with {row, col} of the letter, or null if out of bounds.
+         */
+        function getAnswerCellCoords(wordIndex, letterIndex) {
+            const word = crosswordData.words[wordIndex];
+            let r = word.startRow;
+            let c = word.startCol;
+
+            if (word.direction === "across") {
+                c += (letterIndex + 1); // English word starts one cell after the clue
+            } else { // direction === "down"
+                r += (letterIndex + 1); // English word starts one cell after the clue
+            }
+
+            if (r >= 0 && r < crosswordData.gridSize.rows && c >= 0 && c < crosswordData.gridSize.cols) {
+                return { row: r, col: c };
+            }
+            return null;
+        }
+
+        /**
+         * Updates the visual and interactive state of all answer cells based on their word affiliations.
+         * This function is called after any input or check operation.
+         */
+        function updateCellStates() {
+            console.log(`[updateCellStates] Re-evaluating all cell states.`);
+
+            for (let r = 0; r < crosswordData.gridSize.rows; r++) {
+                for (let c = 0; c < crosswordData.gridSize.cols; c++) {
+                    const cellData = gridCellData[r][c];
+                    const cellDiv = gridContainer.children[r * crosswordData.gridSize.cols + c];
+                    const inputElement = cellDiv.querySelector('input');
+
+                    if (cellData.type !== 'answer' || !inputElement) {
+                        continue; // Only process answer cells with inputs
+                    }
+
+                    let shouldBeLocked = false;
+                    let shouldBeIncorrect = false; // Only if not locked by any correct word
+
+                    // Check all words this cell belongs to
+                    for (const ref of cellData.wordRefs) {
+                        const wordObj = crosswordData.words[ref.wordIndex];
+                        let currentWordIsFullyFilled = true;
+                        let currentWordIsCorrect = true;
+
+                        // Check the status of the current word (wordObj)
+                        for (let i = 0; i < wordObj.english.length; i++) {
+                            const coords = getAnswerCellCoords(ref.wordIndex, i);
+                            if (coords) {
+                                const relatedCellData = gridCellData[coords.row][coords.col];
+                                if (relatedCellData.value === "") {
+                                    currentWordIsFullyFilled = false;
+                                }
+                                if (relatedCellData.value.toUpperCase() !== wordObj.english[i].toUpperCase()) {
+                                    currentWordIsCorrect = false;
+                                }
+                            }
+                        }
+
+                        if (currentWordIsFullyFilled && currentWordIsCorrect) {
+                            shouldBeLocked = true; // This cell is part of at least one correct word
+                            // No break here, continue to check if it's also part of an incorrect word
+                            // This ensures `shouldBeIncorrect` is set correctly if it's part of both
+                        } else if (currentWordIsFullyFilled && !currentWordIsCorrect) {
+                            // If this cell is part of a fully filled BUT incorrect word,
+                            // and it's not already determined to be locked by a correct word,
+                            // then it *could* be incorrect. We'll set this flag and decide later.
+                            shouldBeIncorrect = true;
+                        }
+                    }
+
+                    // Now apply the styling and lock state based on the gathered information
+                    if (shouldBeLocked) {
+                        cellDiv.classList.remove("incorrect");
+                        cellDiv.classList.add("correct");
+                        inputElement.disabled = true;
+                        cellData.isLocked = true;
+                        console.log(`[updateCellStates] Cell (${r}, ${c}) is LOCKED (green).`);
+                    } else {
+                        // If not locked, it's either incorrect or neutral
+                        cellDiv.classList.remove("correct"); // Ensure green is removed if it's not locked
+                        inputElement.disabled = false; // Ensure it's enabled if not locked
+                        cellData.isLocked = false; // Ensure unlocked
+
+                        if (shouldBeIncorrect) {
+                            // This cell is part of at least one fully filled but incorrect word,
+                            // AND it's not part of any fully correct word. So, it should be red.
+                            cellDiv.classList.add("incorrect");
+                            console.log(`[updateCellStates] Cell (${r}, ${c}) is INCORRECT (red).`);
+                        } else {
+                            // This cell is not part of any fully correct word, nor any fully incorrect word.
+                            // It's either empty or part of an incomplete word.
+                            cellDiv.classList.remove("incorrect"); // Ensure red is removed
+                            console.log(`[updateCellStates] Cell (${r}, ${c}) is NEUTRAL (white).`);
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
+         * Handles the 'input' event. This is primarily for non-keypress inputs like paste.
+         * @param {Event} event - The input event.
+         */
+        function handleInput(event) {
+            const input = event.target;
+            if (!input.dataset.row) return; // Guard clause for unexpected targets
+
+            const row = parseInt(input.dataset.row);
+            const col = parseInt(input.dataset.col);
+
+            // Ensure value is uppercase and update the internal grid data
+            input.value = input.value.toUpperCase(); // Ensure uppercase for pasted content
+            gridCellData[row][col].value = input.value;
+
+            // Re-evaluate all cell states after any input
+            updateCellStates();
+            // No automatic focus movement here, as keydown will handle it for single characters.
+            // For paste, the user might paste multiple characters, so auto-progression here might be
+            // undesirable or need more complex logic (e.g., filling multiple cells).
+        }
+
+        /**
+         * Handles keyboard navigation (arrow keys, backspace, and character input) in crossword cells.
+         * @param {KeyboardEvent} event - The keydown event.
+         */
+        function handleKeyDown(event) {
+            console.log(`[handleKeyDown] Raw Keydown event. Key: ${event.key}, Target:`, event.target);
+            const input = event.target;
+            // CRITICAL FIX: The 'answer-cell' class is on the parent div, not the input itself.
+            // We need to check if the input's closest parent div has the 'answer-cell' class.
+            const parentCell = input.closest('.crossword-cell.answer-cell');
+
+            if (!input || !parentCell) { // Check if input exists and its parent is a valid answer cell
+                console.log(`[handleKeyDown] Guard clause triggered. Target is not a valid answer cell input.`);
+                return;
+            }
+
+            const row = parseInt(input.dataset.row);
+            const col = parseInt(input.dataset.col);
+
+            // If the current cell is locked, prevent any input or movement from it.
+            if (gridCellData[row][col].isLocked) {
+                console.log(`[handleKeyDown] Current cell (${row}, ${col}) is locked. Ignoring key: ${event.key}`);
+                event.preventDefault(); // Prevent any default behavior
+                return;
+            }
+
+            let deltaRow = 0;
+            let deltaCol = 0;
+
+            if (event.key === "Backspace") {
+                event.preventDefault(); // Prevent default backspace behavior (clearing current cell)
+                if (input.value !== "") { // If there's a letter, clear it first
+                    console.log(`[handleKeyDown] Backspace: Clearing value in (${row}, ${col})`);
+                    input.value = "";
+                    gridCellData[row][col].value = "";
+                    // Re-evaluate all cell states after clearing a cell
+                    updateCellStates();
+                } else { // If cell is empty, move to previous
+                    console.log(`[handleKeyDown] Backspace: Cell empty, attempting to move to previous.`);
+                    if (activeWordIndex !== -1) {
+                        const currentWord = crosswordData.words[activeWordIndex];
+                        let currentLetterIndex = -1;
+                        for (const ref of gridCellData[row][col].wordRefs) {
+                            if (ref.wordIndex === activeWordIndex) {
+                                currentLetterIndex = ref.letterIndex;
+                                break;
+                            }
+                        }
+
+                        if (currentLetterIndex > 0) {
+                            // Find previous editable cell in the active word
+                            for (let i = currentLetterIndex - 1; i >= 0; i--) {
+                                const prevCellCoords = getAnswerCellCoords(activeWordIndex, i);
+                                if (prevCellCoords) {
+                                    const prevCellData = gridCellData[prevCellCoords.row][prevCellCoords.col];
+                                    if (!prevCellData.isLocked) {
+                                        console.log(`[handleKeyDown] Backspace: Moving to previous editable cell in active word: (${prevCellCoords.row}, ${prevCellCoords.col})`);
+                                        focusCell(prevCellCoords.row, prevCellCoords.col);
+                                        return; // Successfully moved
+                                    }
+                                }
+                            }
+                            // If loop finishes, no editable cell found in active word before current
+                            console.log(`[handleKeyDown] At start of active word, clearing active state.`);
+                            activeWordIndex = -1; // Clear active word
+                            clearHighlights();
+                        } else {
+                            console.log(`[handleKeyDown] At start of active word, clearing active state.`);
+                            activeWordIndex = -1;
+                            clearHighlights();
+                        }
+                    } else {
+                        console.log(`[handleKeyDown] No active word, moving left in grid.`);
+                        findAndFocusNextCell(row, col, 0, -1); // Move left by default
+                    }
+                }
+            } else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+                event.preventDefault(); // Prevent page scrolling
+                console.log(`[handleKeyDown] Arrow key pressed: ${event.key}. Clearing active word.`);
+                activeWordIndex = -1; // Clear active word on arrow key navigation
+                clearHighlights();
+
+                switch (event.key) {
+                    case "ArrowUp": deltaRow = -1; activeDirection = "down"; break;
+                    case "ArrowDown": deltaRow = 1; activeDirection = "down"; break;
+                    case "ArrowLeft": deltaCol = -1; activeDirection = "across"; break;
+                    case "ArrowRight": deltaCol = 1; activeDirection = "across"; break;
+                }
+                findAndFocusNextCell(row, col, deltaRow, deltaCol);
+            } else if (/^[a-zA-Z]$/.test(event.key) && event.key.length === 1) {
+                event.preventDefault(); // Prevent default character input to control it explicitly
+                input.value = event.key.toUpperCase(); // Set the new character
+                gridCellData[row][col].value = input.value; // Update internal state
+                console.log(`[handleKeyDown] Typed character '${event.key.toUpperCase()}' into (${row}, ${col}).`);
+
+
+                // Re-evaluate all cell states after typing a character
+                updateCellStates();
+
+                let nextTargetCoords = null;
+                let nextTargetInput = null;
+
+                // Priority 1: Try to find the next editable cell within the active word
+                console.log(`[handleKeyDown] Attempting auto-progression. Active Word Index: ${activeWordIndex}`);
+                if (activeWordIndex !== -1) {
+                    const currentWord = crosswordData.words[activeWordIndex];
+                    let currentLetterIndex = -1;
+                    const wordRef = gridCellData[row][col].wordRefs.find(ref => ref.wordIndex === activeWordIndex);
+                    if (wordRef) {
+                        currentLetterIndex = wordRef.letterIndex;
+                    }
+
+                    if (currentLetterIndex !== -1) {
+                        // Loop from the cell AFTER the current one to the end of the word
+                        for (let i = currentLetterIndex + 1; i < currentWord.english.length; i++) {
+                            const potentialNextCoords = getAnswerCellCoords(activeWordIndex, i);
+                            if (potentialNextCoords) {
+                                const potentialNextCellDiv = gridContainer.children[potentialNextCoords.row * crosswordData.gridSize.cols + potentialNextCoords.col];
+                                const potentialNextInput = potentialNextCellDiv.querySelector('input');
+                                const potentialNextCellData = gridCellData[potentialNextCoords.row][potentialNextCoords.col];
+                                
+                                console.log(`[handleKeyDown]   Checking potential next cell in active word: (${potentialNextCoords.row}, ${potentialNextCoords.col}). Input exists: ${!!potentialNextInput}, Disabled: ${potentialNextInput ? potentialNextInput.disabled : 'N/A'}, Locked: ${potentialNextCellData.isLocked}`);
+
+                                // If we find an input that is NOT disabled AND NOT locked, this is our target.
+                                if (potentialNextInput && !potentialNextInput.disabled && !potentialNextCellData.isLocked) {
+                                    nextTargetCoords = potentialNextCoords;
+                                    nextTargetInput = potentialNextInput; // Store reference to the input
+                                    console.log(`[handleKeyDown]   Found valid next cell in active word: (${nextTargetCoords.row}, ${nextTargetCoords.col})`);
+                                    break; // Found it, exit loop
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // If a specific target was found within the active word AND it's still enabled and not locked, focus it.
+                if (nextTargetCoords && nextTargetInput && !nextTargetInput.disabled && !gridCellData[nextTargetCoords.row][nextTargetCoords.col].isLocked) {
+                    console.log(`[handleKeyDown] Focusing next cell in active word: (${nextTargetCoords.row}, ${nextTargetCoords.col})`);
+                    focusCell(nextTargetCoords.row, nextTargetCoords.col);
+                } else {
+                    console.log(`[handleKeyDown] No valid next cell found in active word or it's disabled/locked. Searching entire grid from (${row}, ${col}).`);
+                    // If no target found within the active word, or the found target is now disabled/locked,
+                    // then try to find the next available cell in the entire grid (rightwards from current).
+                    findAndFocusNextCell(row, col, 0, 1);
+                }
+            }
+            // Any other key (e.g., Tab, Shift, Ctrl) will be ignored by this handler.
+        }
+
+        /**
+         * Finds and focuses the next available and editable answer cell.
+         * It iterates from the starting cell in the given delta direction.
+         * @param {number} startRow - The row to start the search from.
+         * @param {number} startCol - The column to start the search from.
+         * @param {number} deltaRow - Row increment for each step (-1 for up, 1 for down, 0 for no row change).
+         * @param {number} deltaCol - Column increment for each step (-1 for left, 1 for right, 0 for no col change).
+         */
+        function findAndFocusNextCell(startRow, startCol, deltaRow, deltaCol) {
+            console.log(`[findAndFocusNextCell] Called from (${startRow}, ${startCol}) with delta (${deltaRow}, ${deltaCol})`);
+            let currentRow = startRow;
+            let currentCol = startCol;
+            const maxRows = crosswordData.gridSize.rows;
+            const maxCols = crosswordData.gridSize.cols;
+
+            let attempts = 0;
+            const maxAttempts = maxRows * maxCols * 2; // Safety net to prevent infinite loops
+
+            do {
+                // Only move from the initial startRow/startCol after the first attempt
+                if (attempts > 0 || (deltaRow === 0 && deltaCol === 0)) {
+                    currentRow += deltaRow;
+                    currentCol += deltaCol;
+                }
+
+                // Wrap around the grid if out of bounds
+                if (currentRow < 0) currentRow = maxRows - 1;
+                if (currentRow >= maxRows) currentRow = 0;
+                if (currentCol < 0) currentCol = maxCols - 1;
+                if (currentCol >= maxCols) currentCol = 0;
+
+                const cellData = gridCellData[currentRow][currentCol];
+                const cellDiv = gridContainer.children[currentRow * maxCols + currentCol];
+                const input = cellDiv ? cellDiv.querySelector('input') : null;
+
+                console.log(`[findAndFocusNextCell]   Checking cell: (${currentRow}, ${currentCol}). Type: ${cellData ? cellData.type : 'N/A'}, Input exists: ${!!input}, Disabled: ${input ? input.disabled : 'N/A'}, Locked: ${cellData ? cellData.isLocked : 'N/A'}`);
+
+                // Check if it's an answer cell AND not disabled AND not locked
+                if (cellData && cellData.type === "answer" && input && !input.disabled && !cellData.isLocked) {
+                    console.log(`[findAndFocusNextCell]   Found valid and enabled cell: (${currentRow}, ${currentCol}). Calling focusCell.`);
+                    focusCell(currentRow, currentCol); // This will set activeCell and highlight
+                    return;
+                }
+                attempts++;
+            } while (attempts < maxAttempts);
+
+            console.log(`[findAndFocusNextCell] No valid cell found after ${attempts} attempts. Clearing active state.`);
+            // If no valid cell found after all attempts, clear active state
+            activeCell = null;
+            activeRow = -1;
+            activeCol = -1;
+            activeWordIndex = -1;
+            clearHighlights();
+        }
+
+        /**
+         * Sets focus to a specific cell and updates activeCell/activeRow/activeCol.
+         * This function should only be called with coordinates of an *already validated* target cell.
+         * @param {number} row - The row to focus.
+         * @param {number} col - The column to focus.
+         */
+        function focusCell(row, col) {
+            console.log(`[focusCell] Attempting to focus cell (${row}, ${col}). Current active: (${activeRow}, ${activeCol})`);
+            const cellIndex = row * crosswordData.gridSize.cols + col;
+            const targetCellDiv = gridContainer.children[cellIndex];
+            const targetInput = targetCellDiv.querySelector('input');
+            const targetCellData = gridCellData[row][col];
+
+            // Remove current-active-cell from previous active cell's parent
+            if (activeCell && activeCell.parentElement) {
+                activeCell.parentElement.classList.remove("current-active-cell");
+                console.log(`[focusCell] Removed 'current-active-cell' from previous cell.`);
+            }
+
+            // Ensure the cell is an answer cell and not disabled AND not locked before focusing
+            if (targetInput && targetCellData.type === "answer" && !targetInput.disabled && !targetCellData.isLocked) {
+                activeCell = targetInput;
+                activeRow = row;
+                activeCol = col;
+                activeCell.focus();
+                targetCellDiv.classList.add("current-active-cell"); // Add current-active-cell class
+                updateHighlight(activeWordIndex); // Call updateHighlight with activeWordIndex
+                console.log(`[focusCell] Successfully focused cell (${row}, ${col}). Input disabled: ${targetInput.disabled}, Locked: ${targetCellData.isLocked}`);
+            } else {
+                console.log(`[focusCell] Failed to focus cell (${row}, ${col}). Input exists: ${!!targetInput}, Is answer: ${targetCellData.type === "answer"}, Is disabled: ${targetInput ? targetInput.disabled : 'N/A'}, Is locked: ${targetCellData.isLocked}`);
+                // If the target cell is not focusable (e.g., disabled or locked), do nothing here.
+                // The calling function (handleKeyDown or findAndFocusNextCell) is responsible
+                // for finding a truly focusable cell and calling focusCell with it.
+                return;
+            }
+        }
+
+        /**
+         * Removes all existing highlights from cells.
+         */
+        function clearHighlights() {
+            document.querySelectorAll(".crossword-cell").forEach(cell => {
+                cell.classList.remove("highlight-active", "current-active-cell");
+                // Do NOT remove 'correct' or 'incorrect' here, as those represent a locked state.
+            });
+            console.log(`[clearHighlights] All highlight-active and current-active-cell classes cleared.`);
+        }
+
+        /**
+         * Highlights the entire active word if activeWordIndex is set, otherwise just the single cell.
+         * @param {number} [wordIndexToHighlight] - Optional: The index of the word to highlight. If not provided, highlights the single activeCell.
+         */
+        function updateHighlight(wordIndexToHighlight = -1) { // Default to -1, meaning no specific word to highlight
+            // Do not clear current-active-cell here, it's handled in focusCell and clearGrid
+            document.querySelectorAll(".crossword-cell.highlight-active").forEach(cell => {
+                cell.classList.remove("highlight-active");
+            });
+            console.log(`[updateHighlight] Previous word highlights cleared (highlight-active only).`);
+
+
+            if (wordIndexToHighlight !== -1 && crosswordData.words[wordIndexToHighlight]) {
+                const word = crosswordData.words[wordIndexToHighlight];
+                console.log(`[updateHighlight] Highlighting word: ${word.english} (Index: ${wordIndexToHighlight})`);
+
+                // Highlight the clue cell
+                const clueCellDiv = gridContainer.children[word.startRow * crosswordData.gridSize.cols + word.startCol];
+                if (clueCellDiv) {
+                    clueCellDiv.classList.add("highlight-active");
+                    console.log(`[updateCellStates]   Clue cell (${word.startRow}, ${word.startCol}) highlighted.`);
+                }
+
+                // Highlight the entire English word (answer cells)
+                for (let i = 0; i < word.english.length; i++) {
+                    const coords = getAnswerCellCoords(wordIndexToHighlight, i);
+                    if (coords) {
+                        const cellDiv = gridContainer.children[coords.row * crosswordData.gridSize.cols + coords.col]; // Corrected calculation
+                        if (cellDiv) {
+                            cellDiv.classList.add("highlight-active");
+                            console.log(`[updateCellStates]   Answer cell (${coords.row}, ${coords.col}) highlighted.`);
+                        }
+                    }
+                }
+            } else if (activeCell) {
+                // If no specific word is active, just highlight the currently focused cell
+                const activeCellDiv = gridContainer.children[activeRow * crosswordData.gridSize.cols + activeCol];
+                if (activeCellDiv) {
+                    activeCellDiv.classList.add("highlight-active");
+                    console.log(`[updateCellStates] Highlighting single active cell: (${activeRow}, ${activeCol})`);
+                }
+            }
+        }
+
+        /**
+         * Checks all playable cells and updates their styling (correct/incorrect).
+         * Displays a message indicating if all cells are complete and correct.
+         */le
+        function checkAllCells() {
+            console.log(`[checkAllCells] Checking all cells...`);
+            let allPuzzlesCorrect = true; // Overall puzzle correctness
+            let totalWords = crosswordData.words.length;
+            let correctWordsCount = 0;
+
+            // Clear only highlight styling, preserve correct/incorrect for locked cells
+            for (let r = 0; r < crosswordData.gridSize.rows; r++) {
+                for (let c = 0; c < crosswordData.gridSize.cols; c++) {
+                    const cellDiv = gridContainer.children[r * crosswordData.gridSize.cols + c];
+                    cellDiv.classList.remove("highlight-active", "current-active-cell");
+                    // Do NOT remove 'correct' or 'incorrect' here. updateCellStates will re-evaluate.
+                    // Also, do NOT re-enable inputs here. updateCellStates will handle disabling.
+                }
+            }
+
+            // Re-evaluate all cell states for the entire grid
+            updateCellStates();
+
+            // Re-evaluate overall puzzle correctness after all words are checked
+            allPuzzlesCorrect = true; // Reset for final check
+            correctWordsCount = 0; // Reset for accurate count
+            for (let r = 0; r < crosswordData.gridSize.rows; r++) {
+                for (let c = 0; c < crosswordData.gridSize.cols; c++) {
+                    const cellData = gridCellData[r][c];
+                    if (cellData && cellData.type === "answer") {
+                        if (!cellData.isLocked) { // If any answer cell is not locked, puzzle is not fully correct
+                            allPuzzlesCorrect = false;
+                            break;
+                        }
+                    }
+                }
+                if (!allPuzzlesCorrect) break;
+            }
+
+            // Count truly correct words
+            crosswordData.words.forEach((wordObj, wordIndex) => {
+                let wordIsCorrectAndLocked = true;
+                for (let i = 0; i < wordObj.english.length; i++) {
+                    const coords = getAnswerCellCoords(wordIndex, i);
+                    if (coords && !gridContainer.children[coords.row * crosswordData.gridSize.cols + coords.col].classList.contains('correct')) {
+                        wordIsCorrectAndLocked = false;
+                        break;
+                    }
+                }
+                if (wordIsCorrectAndLocked) {
+                    correctWordsCount++;
+                }
+            });
+
+
+            // Handle overall puzzle message
+            if (allPuzzlesCorrect && totalWords > 0) {
+                showMessage("Congratulations!", "You have completed the crossword puzzle correctly!");
+                console.log(`[checkAllCells] Puzzle complete and correct!`);
+            } else if (totalWords === 0) {
+                showMessage("No Words Defined", "There are no words defined in the puzzle to check.");
+                console.log(`[checkAllCells] No words defined.`);
+            } else {
+                showMessage("Keep Going!", `You have ${correctWordsCount} out of ${totalWords} words correct.`);
+                console.log(`[checkAllCells] Puzzle incomplete or incorrect. Correct words: ${correctWordsCount}/${totalWords}`);
+            }
+        }
+
+        /**
+         * Clears all user input from the grid.
+         */
+        function clearGrid() {
+            console.log(`[clearGrid] Clearing puzzle...`);
+            for (let r = 0; r < crosswordData.gridSize.rows; r++) {
+                for (let c = 0; c < crosswordData.gridSize.cols; c++) {
+                    const cellData = gridCellData[r][c];
+                    const cellDiv = gridContainer.children[r * crosswordData.gridSize.cols + c];
+
+                    if (cellData && cellData.type === "answer") {
+                        const input = cellDiv.querySelector('input');
+                        if (input) {
+                            input.value = "";
+                            input.disabled = false; // Re-enable input
+                            cellData.value = ''; // Clear internal state
+                        }
+                    }
+                    // Clear all styling from all cell types
+                    cellDiv.classList.remove("correct", "incorrect", "highlight-active", "current-active-cell");
+                    if (cellData) { // Ensure cellData exists before accessing isLocked
+                        cellData.isLocked = false; // Reset locked state on clear
+                    }
+                }
+            }
+            activeCell = null;
+            activeRow = -1;
+            activeCol = -1;
+            activeWordIndex = -1;
+            showMessage("Puzzle Cleared", "All your answers have been cleared. Start fresh!");
+            console.log(`[clearGrid] Puzzle cleared.`);
+        }
+
+        /**
+         * Displays a custom message box.
+         * @param {string} title - The title of the message.
+         * @param {string} content - The content of the message.
+         */
+        function showMessage(title, content) {
+            messageTitle.textContent = title;
+            messageContent.textContent = content;
+            messageBox.classList.remove("hidden");
+            console.log(`[showMessage] Displaying message: "${title}" - "${content}"`);
+        }
+
+        /**
+         * Hides the custom message box.
+         */
+        function hideMessage() {
+            messageBox.classList.add("hidden");
+            console.log(`[hideMessage] Hiding message box.`);
+        }
+    </script>
+</body>
+</html>
+<div class="mt-8 text-center">
+    <a href="index.html" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">
+         Back to Home Page
+    </a>
+</div>
+<a href="crossword2.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-indigo-600 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">
+        Next →
+    </a>
