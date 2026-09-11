@@ -12,7 +12,7 @@
             font-family: "Inter", sans-serif;
             background-color: #f0f2f5;
             display: flex;
-            flex-direction: column; /* Changed to column to stack header and content */
+            flex-direction: column; 
             justify-content: center;
             align-items: center;
             min-height: 100vh;
@@ -22,72 +22,71 @@
 
         .crossword-grid {
             display: grid;
-            /* Grid columns will be set dynamically by JS based on gridSize.cols */
-            grid-template-columns: repeat(10, minmax(0, 1fr)); /* 10 columns */
-            gap: 1px; /* Gap between cells */
-            border: 2px solid #374151; /* Darker border for the overall grid */
-            border-radius: 8px; /* Rounded corners for the grid container */
-            overflow: hidden; /* Ensures rounded corners are visible */
-            max-width: fit-content; /* Adjusts to content width */
-            margin: 0 auto; /* Center the grid */
+            grid-template-columns: repeat(10, minmax(0, 1fr)); 
+            gap: 1px; 
+            border: 2px solid #374151; 
+            border-radius: 8px; 
+            overflow: hidden; 
+            max-width: fit-content; 
+            margin: 0 auto; 
         }
 
         .crossword-cell {
-            width: 90px; /* Increased width for each cell to accommodate longer clues */
-            height: 35px; /* Rectangular height for each cell */
+            width: 90px; 
+            height: 35px; 
             display: flex;
-            flex-direction: column; /* Stack clue text and input vertically */
+            flex-direction: column; 
             justify-content: center;
             align-items: center;
-            background-color: #ffffff; /* White background for playable cells */
-            border: 1px solid #d1d5db; /* Light border for individual cells */
+            background-color: #ffffff; 
+            border: 1px solid #d1d5db; 
             font-weight: bold;
             text-transform: uppercase;
-            color: #1f2937; /* Dark text color */
-            position: relative; /* For positioning content, crucial for pseudo-elements and z-index */
-            border-radius: 4px; /* Slightly rounded corners for cells */
+            color: #1f2937; 
+            position: relative; 
+            border-radius: 4px; 
             transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-            box-sizing: border-box; /* Include padding and border in element's total width and height */
-            overflow: hidden; /* Reverted to original overflow */
+            box-sizing: border-box; 
+            overflow: hidden; 
         }
 
         .crossword-cell.black {
-            background-color: #1f2937; /* Black background for non-playable cells */
-            border: 1px solid #1f2937; /* Match border to background */
+            background-color: #1f2937; 
+            border: 1px solid #1f2937; 
         }
 
         /* Styles for Clue Cells (the starting cell of a word) */
         .crossword-cell.clue-only-cell {
-            background-color: #e0f2fe; /* Light blue background for clue cells */
-            color: #1e40af; /* Darker blue text for clues */
-            font-size: 0.65em; /* Smaller font for the clue word */
+            background-color: #e0f2fe; 
+            color: #1e40af; 
+            font-size: 0.65em; 
             text-align: center;
-            flex-direction: row; /* Keep clue text and arrow inline */
+            flex-direction: row; 
             padding: 2px;
             box-sizing: border-box;
             line-height: 1;
-            white-space: nowrap; /* Prevent text from wrapping */
-            overflow: hidden; /* Hide overflow if it still happens */
-            text-overflow: ellipsis; /* Add ellipsis if text overflows after nowrap */
-            width: 100%; /* Take full width of cell */
-            height: 100%; /* Take full height of cell */
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            width: 100%; 
+            height: 100%; 
             justify-content: center;
             align-items: center;
         }
 
         .clue-only-cell .arrow-icon {
-            width: 16px; /* Size of the arrow icon */
+            width: 16px; 
             height: 16px;
-            color: #1e40af; /* Arrow color */
-            margin-left: 4px; /* Space between clue text and arrow */
-            flex-shrink: 0; /* Prevent arrow from shrinking */
+            color: #1e40af; 
+            margin-left: 4px; 
+            flex-shrink: 0; 
         }
 
         /* Styles for Answer Cells (where letters are typed) */
         .crossword-cell.answer-cell input {
             width: 100%;
             height: 100%;
-            text-align: center; /* Centers the letter horizontally */
+            text-align: center; 
             background: transparent;
             border: none;
             outline: none;
@@ -100,43 +99,40 @@
             caret-color: transparent;
             flex-grow: 1;
             box-sizing: border-box;
-            line-height: 35px; /* Centers the letter vertically by matching the cell's height */
+            line-height: 35px; 
         }
 
         .crossword-cell.highlight-active {
-            background-color: #bfdbfe !important; /* Light blue for active cell, ensures override */
-            border-color: #3b82f6; /* Blue border for active cell */
+            background-color: #bfdbfe !important; 
+            border-color: #3b82f6; 
         }
 
         .crossword-cell.correct {
-            background-color: #dcfce7; /* Light green for correct cells */
-            border-color: #22c55e; /* Green border for correct cells */
+            background-color: #dcfce7; 
+            border-color: #22c55e; 
         }
 
         .crossword-cell.incorrect {
-            background-color: #fee2e2; /* Light red for incorrect cells */
-            border-color: #ef4444; /* Red border for incorrect cells */
+            background-color: #fee2e2; 
+            border-color: #ef4444; 
         }
 
         /* New style for the currently typing cell */
         .crossword-cell.current-active-cell {
             border-top: 2px solid #ff9800 !important;
             border-bottom: 2px solid #ff9800 !important;
-            /* Using inset box-shadows for a consistent 2px border on all sides */
-            box-shadow: inset 2px 0 0 0 #ff9800,    /* Left inset "border" */
-                        inset -2px 0 0 0 #ff9800,   /* Right inset "border" */
-                        0 0 0 2px rgba(255, 152, 0, 0.5); /* Outer orange glow */
-            /* Ensure no default borders interfere */
+            box-shadow: inset 2px 0 0 0 #ff9800,   
+                        inset -2px 0 0 0 #ff9800,  
+                        0 0 0 2px rgba(255, 152, 0, 0.5); 
             border-left: none !important;
             border-right: none !important;
-            z-index: 10; /* Ensure the active cell is on top */
+            z-index: 10; 
         }
-
 
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .crossword-cell {
-                width: 60px; /* Adjusted for smaller screens */
+                width: 60px; 
                 height: 30px;
             }
             .crossword-cell.clue-only-cell {
@@ -148,13 +144,13 @@
             }
             .crossword-cell.answer-cell input {
                 font-size: 1rem;
-                line-height: 30px; /* Adjust line-height for responsive height */
+                line-height: 30px; 
             }
         }
 
         @media (max-width: 480px) {
             .crossword-cell {
-                width: 45px; /* Adjusted for smallest screens */
+                width: 45px; 
                 height: 25px;
             }
             .clue-only-cell .arrow-icon {
@@ -165,30 +161,28 @@
                 height: 12px;
             }
             .crossword-grid {
-                width: 100%; /* Allow grid to take full width and handle overflow */
-                overflow-x: auto; /* Enable horizontal scrolling if cells are too wide */
+                width: 100%; 
+                overflow-x: auto; 
             }
             .crossword-cell.answer-cell input {
-                line-height: 25px; /* Adjust line-height for responsive height */
+                line-height: 25px; 
             }
         }
     </style>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8910463443717698"
-     crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8910463443717698" crossorigin="anonymous"></script>
     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-V0EE9YL3GV"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-V0EE9YL3GV"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
 
-  gtag('config', 'G-V0EE9YL3GV');
-</script>
+      gtag('config', 'G-V0EE9YL3GV');
+    </script>
 </head>
 <body class="bg-gray-100 p-4">
     <div class="container mx-auto p-6 bg-white shadow-xl rounded-xl flex flex-col items-center max-w-4xl">
         <h1 class="text-4xl font-extrabold text-gray-800 mb-8 text-center tracking-tight">Crossword Number 5</h1>
-
 
         <div id="crossword-container" class="flex flex-col lg:flex-row gap-8 w-full justify-center items-start">
             <div class="crossword-grid flex-shrink-0" id="crossword-grid">
@@ -216,7 +210,6 @@
     </div>
 
     <script>
-        <script>
         // Define the crossword data: grid size, and words with their clues and answer letters.
         const crosswordData = {
             gridSize: { rows: 16, cols: 10 }, // 16 rows, 10 columns
@@ -267,7 +260,6 @@
             ]
         };
 
-        // Global variables for game state
         let gridCellData = Array(crosswordData.gridSize.rows).fill(null).map(() => Array(crosswordData.gridSize.cols).fill(null));
         let activeCell = null;
         let activeRow = -1;
@@ -275,7 +267,6 @@
         let activeDirection = "across";
         let activeWordIndex = -1;
 
-        // DOM element references
         const gridContainer = document.getElementById("crossword-grid");
         const checkButton = document.getElementById("check-button");
         const clearButton = document.getElementById("clear-button");
@@ -284,7 +275,6 @@
         const messageContent = document.getElementById("message-content");
         const messageCloseButton = document.getElementById("message-close-button");
 
-        // Initialization
         document.addEventListener("DOMContentLoaded", () => {
             createGrid();
             setupCells();
@@ -856,24 +846,20 @@
         function hideMessage() {
             messageBox.classList.add("hidden");
         }
-        </script>
     </script>
-        <div class="mt-8 flex justify-between items-center">
-            <a href="crossword4.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-indigo-600 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">
-                ← Previous
-            </a>
     
-            <a href="index.html" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">
-                Back to Home Page
-            </a>
+    <div class="mt-8 flex justify-between items-center w-full max-w-4xl mx-auto">
+        <a href="crossword4.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-indigo-600 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">
+            ← Previous
+        </a>
 
-            <a href="crossword6.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-indigo-600 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">
-                Next →
-            </a>
+        <a href="index.html" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">
+            Back to Home Page
+        </a>
 
-        </div>
-    </body>
+        <a href="crossword6.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-indigo-600 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">
+            Next →
+        </a>
+    </div>
+</body>
 </html>
-
-
-
