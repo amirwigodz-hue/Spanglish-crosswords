@@ -625,22 +625,64 @@
          */
         function handleInput(event) {
             const input = event.target;
-            if (!input.dataset.row) return; // Guard clause for unexpected targets
+            if (!input.dataset.row) return;
 
             const row = parseInt(input.dataset.row);
             const col = parseInt(input.dataset.col);
 
-            // Ensure value is uppercase and update the internal grid data
-            input.value = input.value.toUpperCase(); // Ensure uppercase for pasted content
-            gridCellData[row][col].value = input.value;
+            if (input.value === "") {
+                 gridCellData[row][col].value = "";
+                 updateCellStates();
+                 return;
+            }
 
-            // Re-evaluate all cell states after any input
-            updateCellStates();
-            // No automatic focus movement here, as keydown will handle it for single characters.
-            // For paste, the user might paste multiple characters, so auto-progression here might be
-            // undesirable or need more complex logic (e.g., filling multiple cells).
+            const typedChar = input.value.slice(-1).toUpperCase();
+
+            if (/^[A-Z]$/.test(typedChar)) {
+                input.value = typedChar;
+                gridCellData[row][col].value = typedChar;
+                updateCellStates();
+
+                let nextTargetCoords = null;
+                let nextTargetInput = null;
+
+                if (activeWordIndex !== -1) {
+                    const currentWord = crosswordData.words[activeWordIndex];
+                    let currentLetterIndex = -1;
+                    const wordRef = gridCellData[row][col].wordRefs.find(ref => ref.wordIndex === activeWordIndex);
+                    
+                    if (wordRef) {
+                        currentLetterIndex = wordRef.letterIndex;
+                    }
+
+                    if (currentLetterIndex !== -1) {
+                        for (let i = currentLetterIndex + 1; i < currentWord.english.length; i++) {
+                            const potentialNextCoords = getAnswerCellCoords(activeWordIndex, i);
+                            if (potentialNextCoords) {
+                                const potentialNextCellDiv = gridContainer.children[potentialNextCoords.row * crosswordData.gridSize.cols + potentialNextCoords.col];
+                                const potentialNextInput = potentialNextCellDiv.querySelector('input');
+                                const potentialNextCellData = gridCellData[potentialNextCoords.row][potentialNextCoords.col];
+
+                                if (potentialNextInput && !potentialNextInput.disabled && !potentialNextCellData.isLocked) {
+                                    nextTargetCoords = potentialNextCoords;
+                                    nextTargetInput = potentialNextInput;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (nextTargetCoords && nextTargetInput && !nextTargetInput.disabled && !gridCellData[nextTargetCoords.row][nextTargetCoords.col].isLocked) {
+                    focusCell(nextTargetCoords.row, nextTargetCoords.col);
+                } else {
+                    findAndFocusNextCell(row, col, 0, 1);
+                }
+            } else {
+                input.value = "";
+                gridCellData[row][col].value = "";
+            }
         }
-
         /**
          * Handles keyboard navigation (arrow keys, backspace, and character input) in crossword cells.
          * @param {KeyboardEvent} event - The keydown event.
@@ -730,63 +772,7 @@
                     case "ArrowRight": deltaCol = 1; activeDirection = "across"; break;
                 }
                 findAndFocusNextCell(row, col, deltaRow, deltaCol);
-            } else if (/^[a-zA-Z]$/.test(event.key) && event.key.length === 1) {
-                event.preventDefault(); // Prevent default character input to control it explicitly
-                input.value = event.key.toUpperCase(); // Set the new character
-                gridCellData[row][col].value = input.value; // Update internal state
-                console.log(`[handleKeyDown] Typed character '${event.key.toUpperCase()}' into (${row}, ${col}).`);
 
-
-                // Re-evaluate all cell states after typing a character
-                updateCellStates();
-
-                let nextTargetCoords = null;
-                let nextTargetInput = null;
-
-                // Priority 1: Try to find the next editable cell within the active word
-                console.log(`[handleKeyDown] Attempting auto-progression. Active Word Index: ${activeWordIndex}`);
-                if (activeWordIndex !== -1) {
-                    const currentWord = crosswordData.words[activeWordIndex];
-                    let currentLetterIndex = -1;
-                    const wordRef = gridCellData[row][col].wordRefs.find(ref => ref.wordIndex === activeWordIndex);
-                    if (wordRef) {
-                        currentLetterIndex = wordRef.letterIndex;
-                    }
-
-                    if (currentLetterIndex !== -1) {
-                        // Loop from the cell AFTER the current one to the end of the word
-                        for (let i = currentLetterIndex + 1; i < currentWord.english.length; i++) {
-                            const potentialNextCoords = getAnswerCellCoords(activeWordIndex, i);
-                            if (potentialNextCoords) {
-                                const potentialNextCellDiv = gridContainer.children[potentialNextCoords.row * crosswordData.gridSize.cols + potentialNextCoords.col];
-                                const potentialNextInput = potentialNextCellDiv.querySelector('input');
-                                const potentialNextCellData = gridCellData[potentialNextCoords.row][potentialNextCoords.col];
-                                
-                                console.log(`[handleKeyDown]   Checking potential next cell in active word: (${potentialNextCoords.row}, ${potentialNextCoords.col}). Input exists: ${!!potentialNextInput}, Disabled: ${potentialNextInput ? potentialNextInput.disabled : 'N/A'}, Locked: ${potentialNextCellData.isLocked}`);
-
-                                // If we find an input that is NOT disabled AND NOT locked, this is our target.
-                                if (potentialNextInput && !potentialNextInput.disabled && !potentialNextCellData.isLocked) {
-                                    nextTargetCoords = potentialNextCoords;
-                                    nextTargetInput = potentialNextInput; // Store reference to the input
-                                    console.log(`[handleKeyDown]   Found valid next cell in active word: (${nextTargetCoords.row}, ${nextTargetCoords.col})`);
-                                    break; // Found it, exit loop
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // If a specific target was found within the active word AND it's still enabled and not locked, focus it.
-                if (nextTargetCoords && nextTargetInput && !nextTargetInput.disabled && !gridCellData[nextTargetCoords.row][nextTargetCoords.col].isLocked) {
-                    console.log(`[handleKeyDown] Focusing next cell in active word: (${nextTargetCoords.row}, ${nextTargetCoords.col})`);
-                    focusCell(nextTargetCoords.row, nextTargetCoords.col);
-                } else {
-                    console.log(`[handleKeyDown] No valid next cell found in active word or it's disabled/locked. Searching entire grid from (${row}, ${col}).`);
-                    // If no target found within the active word, or the found target is now disabled/locked,
-                    // then try to find the next available cell in the entire grid (rightwards from current).
-                    findAndFocusNextCell(row, col, 0, 1);
-                }
-            }
             // Any other key (e.g., Tab, Shift, Ctrl) will be ignored by this handler.
         }
 
