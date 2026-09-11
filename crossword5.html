@@ -282,7 +282,7 @@
         const messageBox = document.getElementById("message-box");
         const messageTitle = document.getElementById("message-title");
         const messageContent = document.getElementById("message-content");
-        const messageCloseButton = document.getElementById("message-close-button"); // Corrected assignment
+        const messageCloseButton = document.getElementById("message-close-button");
 
         /**
          * Initializes the crossword grid and sets up cells.
@@ -407,7 +407,6 @@
             });
         }
 
-
         /**
          * Adds all necessary event listeners to the grid cells and buttons.
          */
@@ -497,7 +496,7 @@
                         if (!preferredWordRef) {
                             preferredWordRef = cellData.wordRefs[0]; // Fallback to first word
                         }
-                        activeWordIndex = preferredWordRef.wordIndex; // Corrected: should be wordIndex
+                        activeWordIndex = preferredWordRef.wordIndex;
                         activeDirection = crosswordData.words[activeWordIndex].direction;
                     }
                     updateHighlight(activeWordIndex); // Highlight the chosen word
@@ -580,12 +579,7 @@
 
                         if (currentWordIsFullyFilled && currentWordIsCorrect) {
                             shouldBeLocked = true; // This cell is part of at least one correct word
-                            // No break here, continue to check if it's also part of an incorrect word
-                            // This ensures `shouldBeIncorrect` is set correctly if it's part of both
                         } else if (currentWordIsFullyFilled && !currentWordIsCorrect) {
-                            // If this cell is part of a fully filled BUT incorrect word,
-                            // and it's not already determined to be locked by a correct word,
-                            // then it *could* be incorrect. We'll set this flag and decide later.
                             shouldBeIncorrect = true;
                         }
                     }
@@ -604,13 +598,9 @@
                         cellData.isLocked = false; // Ensure unlocked
 
                         if (shouldBeIncorrect) {
-                            // This cell is part of at least one fully filled but incorrect word,
-                            // AND it's not part of any fully correct word. So, it should be red.
                             cellDiv.classList.add("incorrect");
                             console.log(`[updateCellStates] Cell (${r}, ${c}) is INCORRECT (red).`);
                         } else {
-                            // This cell is not part of any fully correct word, nor any fully incorrect word.
-                            // It's either empty or part of an incomplete word.
                             cellDiv.classList.remove("incorrect"); // Ensure red is removed
                             console.log(`[updateCellStates] Cell (${r}, ${c}) is NEUTRAL (white).`);
                         }
@@ -683,6 +673,7 @@
                 gridCellData[row][col].value = "";
             }
         }
+
         /**
          * Handles keyboard navigation (arrow keys, backspace, and character input) in crossword cells.
          * @param {KeyboardEvent} event - The keydown event.
@@ -690,11 +681,9 @@
         function handleKeyDown(event) {
             console.log(`[handleKeyDown] Raw Keydown event. Key: ${event.key}, Target:`, event.target);
             const input = event.target;
-            // CRITICAL FIX: The 'answer-cell' class is on the parent div, not the input itself.
-            // We need to check if the input's closest parent div has the 'answer-cell' class.
             const parentCell = input.closest('.crossword-cell.answer-cell');
 
-            if (!input || !parentCell) { // Check if input exists and its parent is a valid answer cell
+            if (!input || !parentCell) {
                 console.log(`[handleKeyDown] Guard clause triggered. Target is not a valid answer cell input.`);
                 return;
             }
@@ -702,10 +691,9 @@
             const row = parseInt(input.dataset.row);
             const col = parseInt(input.dataset.col);
 
-            // If the current cell is locked, prevent any input or movement from it.
             if (gridCellData[row][col].isLocked) {
                 console.log(`[handleKeyDown] Current cell (${row}, ${col}) is locked. Ignoring key: ${event.key}`);
-                event.preventDefault(); // Prevent any default behavior
+                event.preventDefault();
                 return;
             }
 
@@ -713,14 +701,13 @@
             let deltaCol = 0;
 
             if (event.key === "Backspace") {
-                event.preventDefault(); // Prevent default backspace behavior (clearing current cell)
-                if (input.value !== "") { // If there's a letter, clear it first
+                event.preventDefault();
+                if (input.value !== "") {
                     console.log(`[handleKeyDown] Backspace: Clearing value in (${row}, ${col})`);
                     input.value = "";
                     gridCellData[row][col].value = "";
-                    // Re-evaluate all cell states after clearing a cell
                     updateCellStates();
-                } else { // If cell is empty, move to previous
+                } else {
                     console.log(`[handleKeyDown] Backspace: Cell empty, attempting to move to previous.`);
                     if (activeWordIndex !== -1) {
                         const currentWord = crosswordData.words[activeWordIndex];
@@ -733,7 +720,6 @@
                         }
 
                         if (currentLetterIndex > 0) {
-                            // Find previous editable cell in the active word
                             for (let i = currentLetterIndex - 1; i >= 0; i--) {
                                 const prevCellCoords = getAnswerCellCoords(activeWordIndex, i);
                                 if (prevCellCoords) {
@@ -741,13 +727,12 @@
                                     if (!prevCellData.isLocked) {
                                         console.log(`[handleKeyDown] Backspace: Moving to previous editable cell in active word: (${prevCellCoords.row}, ${prevCellCoords.col})`);
                                         focusCell(prevCellCoords.row, prevCellCoords.col);
-                                        return; // Successfully moved
+                                        return;
                                     }
                                 }
                             }
-                            // If loop finishes, no editable cell found in active word before current
                             console.log(`[handleKeyDown] At start of active word, clearing active state.`);
-                            activeWordIndex = -1; // Clear active word
+                            activeWordIndex = -1;
                             clearHighlights();
                         } else {
                             console.log(`[handleKeyDown] At start of active word, clearing active state.`);
@@ -756,13 +741,13 @@
                         }
                     } else {
                         console.log(`[handleKeyDown] No active word, moving left in grid.`);
-                        findAndFocusNextCell(row, col, 0, -1); // Move left by default
+                        findAndFocusNextCell(row, col, 0, -1);
                     }
                 }
             } else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
-                event.preventDefault(); // Prevent page scrolling
+                event.preventDefault();
                 console.log(`[handleKeyDown] Arrow key pressed: ${event.key}. Clearing active word.`);
-                activeWordIndex = -1; // Clear active word on arrow key navigation
+                activeWordIndex = -1;
                 clearHighlights();
 
                 switch (event.key) {
@@ -773,12 +758,10 @@
                 }
                 findAndFocusNextCell(row, col, deltaRow, deltaCol);
             }
-            // Any other key (e.g., Tab, Shift, Ctrl) will be ignored by this handler.
         }
 
         /**
          * Finds and focuses the next available and editable answer cell.
-         * It iterates from the starting cell in the given delta direction.
          * @param {number} startRow - The row to start the search from.
          * @param {number} startCol - The column to start the search from.
          * @param {number} deltaRow - Row increment for each step (-1 for up, 1 for down, 0 for no row change).
@@ -795,13 +778,11 @@
             const maxAttempts = maxRows * maxCols * 2; // Safety net to prevent infinite loops
 
             do {
-                // Only move from the initial startRow/startCol after the first attempt
                 if (attempts > 0 || (deltaRow === 0 && deltaCol === 0)) {
                     currentRow += deltaRow;
                     currentCol += deltaCol;
                 }
 
-                // Wrap around the grid if out of bounds
                 if (currentRow < 0) currentRow = maxRows - 1;
                 if (currentRow >= maxRows) currentRow = 0;
                 if (currentCol < 0) currentCol = maxCols - 1;
@@ -811,19 +792,13 @@
                 const cellDiv = gridContainer.children[currentRow * maxCols + currentCol];
                 const input = cellDiv ? cellDiv.querySelector('input') : null;
 
-                console.log(`[findAndFocusNextCell]   Checking cell: (${currentRow}, ${currentCol}). Type: ${cellData ? cellData.type : 'N/A'}, Input exists: ${!!input}, Disabled: ${input ? input.disabled : 'N/A'}, Locked: ${cellData ? cellData.isLocked : 'N/A'}`);
-
-                // Check if it's an answer cell AND not disabled AND not locked
                 if (cellData && cellData.type === "answer" && input && !input.disabled && !cellData.isLocked) {
-                    console.log(`[findAndFocusNextCell]   Found valid and enabled cell: (${currentRow}, ${currentCol}). Calling focusCell.`);
-                    focusCell(currentRow, currentCol); // This will set activeCell and highlight
+                    focusCell(currentRow, currentCol);
                     return;
                 }
                 attempts++;
             } while (attempts < maxAttempts);
 
-            console.log(`[findAndFocusNextCell] No valid cell found after ${attempts} attempts. Clearing active state.`);
-            // If no valid cell found after all attempts, clear active state
             activeCell = null;
             activeRow = -1;
             activeCol = -1;
@@ -833,37 +808,27 @@
 
         /**
          * Sets focus to a specific cell and updates activeCell/activeRow/activeCol.
-         * This function should only be called with coordinates of an *already validated* target cell.
          * @param {number} row - The row to focus.
          * @param {number} col - The column to focus.
          */
         function focusCell(row, col) {
-            console.log(`[focusCell] Attempting to focus cell (${row}, ${col}). Current active: (${activeRow}, ${activeCol})`);
             const cellIndex = row * crosswordData.gridSize.cols + col;
             const targetCellDiv = gridContainer.children[cellIndex];
             const targetInput = targetCellDiv.querySelector('input');
             const targetCellData = gridCellData[row][col];
 
-            // Remove current-active-cell from previous active cell's parent
             if (activeCell && activeCell.parentElement) {
                 activeCell.parentElement.classList.remove("current-active-cell");
-                console.log(`[focusCell] Removed 'current-active-cell' from previous cell.`);
             }
 
-            // Ensure the cell is an answer cell and not disabled AND not locked before focusing
             if (targetInput && targetCellData.type === "answer" && !targetInput.disabled && !targetCellData.isLocked) {
                 activeCell = targetInput;
                 activeRow = row;
                 activeCol = col;
                 activeCell.focus();
-                targetCellDiv.classList.add("current-active-cell"); // Add current-active-cell class
-                updateHighlight(activeWordIndex); // Call updateHighlight with activeWordIndex
-                console.log(`[focusCell] Successfully focused cell (${row}, ${col}). Input disabled: ${targetInput.disabled}, Locked: ${targetCellData.isLocked}`);
+                targetCellDiv.classList.add("current-active-cell");
+                updateHighlight(activeWordIndex);
             } else {
-                console.log(`[focusCell] Failed to focus cell (${row}, ${col}). Input exists: ${!!targetInput}, Is answer: ${targetCellData.type === "answer"}, Is disabled: ${targetInput ? targetInput.disabled : 'N/A'}, Is locked: ${targetCellData.isLocked}`);
-                // If the target cell is not focusable (e.g., disabled or locked), do nothing here.
-                // The calling function (handleKeyDown or findAndFocusNextCell) is responsible
-                // for finding a truly focusable cell and calling focusCell with it.
                 return;
             }
         }
@@ -874,51 +839,39 @@
         function clearHighlights() {
             document.querySelectorAll(".crossword-cell").forEach(cell => {
                 cell.classList.remove("highlight-active", "current-active-cell");
-                // Do NOT remove 'correct' or 'incorrect' here, as those represent a locked state.
             });
-            console.log(`[clearHighlights] All highlight-active and current-active-cell classes cleared.`);
         }
 
         /**
          * Highlights the entire active word if activeWordIndex is set, otherwise just the single cell.
-         * @param {number} [wordIndexToHighlight] - Optional: The index of the word to highlight. If not provided, highlights the single activeCell.
+         * @param {number} [wordIndexToHighlight] - Optional: The index of the word to highlight.
          */
-        function updateHighlight(wordIndexToHighlight = -1) { // Default to -1, meaning no specific word to highlight
-            // Do not clear current-active-cell here, it's handled in focusCell and clearGrid
+        function updateHighlight(wordIndexToHighlight = -1) {
             document.querySelectorAll(".crossword-cell.highlight-active").forEach(cell => {
                 cell.classList.remove("highlight-active");
             });
-            console.log(`[updateHighlight] Previous word highlights cleared (highlight-active only).`);
-
 
             if (wordIndexToHighlight !== -1 && crosswordData.words[wordIndexToHighlight]) {
                 const word = crosswordData.words[wordIndexToHighlight];
-                console.log(`[updateHighlight] Highlighting word: ${word.english} (Index: ${wordIndexToHighlight})`);
 
-                // Highlight the clue cell
                 const clueCellDiv = gridContainer.children[word.startRow * crosswordData.gridSize.cols + word.startCol];
                 if (clueCellDiv) {
                     clueCellDiv.classList.add("highlight-active");
-                    console.log(`[updateCellStates]   Clue cell (${word.startRow}, ${word.startCol}) highlighted.`);
                 }
 
-                // Highlight the entire English word (answer cells)
                 for (let i = 0; i < word.english.length; i++) {
                     const coords = getAnswerCellCoords(wordIndexToHighlight, i);
                     if (coords) {
-                        const cellDiv = gridContainer.children[coords.row * crosswordData.gridSize.cols + coords.col]; // Corrected calculation
+                        const cellDiv = gridContainer.children[coords.row * crosswordData.gridSize.cols + coords.col];
                         if (cellDiv) {
                             cellDiv.classList.add("highlight-active");
-                            console.log(`[updateCellStates]   Answer cell (${coords.row}, ${coords.col}) highlighted.`);
                         }
                     }
                 }
             } else if (activeCell) {
-                // If no specific word is active, just highlight the currently focused cell
                 const activeCellDiv = gridContainer.children[activeRow * crosswordData.gridSize.cols + activeCol];
                 if (activeCellDiv) {
                     activeCellDiv.classList.add("highlight-active");
-                    console.log(`[updateCellStates] Highlighting single active cell: (${activeRow}, ${activeCol})`);
                 }
             }
         }
@@ -928,32 +881,26 @@
          * Displays a message indicating if all cells are complete and correct.
          */
         function checkAllCells() {
-            console.log(`[checkAllCells] Checking all cells...`);
-            let allPuzzlesCorrect = true; // Overall puzzle correctness
+            let allPuzzlesCorrect = true;
             let totalWords = crosswordData.words.length;
             let correctWordsCount = 0;
 
-            // Clear only highlight styling, preserve correct/incorrect for locked cells
             for (let r = 0; r < crosswordData.gridSize.rows; r++) {
                 for (let c = 0; c < crosswordData.gridSize.cols; c++) {
                     const cellDiv = gridContainer.children[r * crosswordData.gridSize.cols + c];
                     cellDiv.classList.remove("highlight-active", "current-active-cell");
-                    // Do NOT remove 'correct' or 'incorrect' here. updateCellStates will re-evaluate.
-                    // Also, do NOT re-enable inputs here. updateCellStates will handle disabling.
                 }
             }
 
-            // Re-evaluate all cell states for the entire grid
             updateCellStates();
 
-            // Re-evaluate overall puzzle correctness after all words are checked
-            allPuzzlesCorrect = true; // Reset for final check
-            correctWordsCount = 0; // Reset for accurate count
+            allPuzzlesCorrect = true;
+            correctWordsCount = 0;
             for (let r = 0; r < crosswordData.gridSize.rows; r++) {
                 for (let c = 0; c < crosswordData.gridSize.cols; c++) {
                     const cellData = gridCellData[r][c];
                     if (cellData && cellData.type === "answer") {
-                        if (!cellData.isLocked) { // If any answer cell is not locked, puzzle is not fully correct
+                        if (!cellData.isLocked) {
                             allPuzzlesCorrect = false;
                             break;
                         }
@@ -962,7 +909,6 @@
                 if (!allPuzzlesCorrect) break;
             }
 
-            // Count truly correct words
             crosswordData.words.forEach((wordObj, wordIndex) => {
                 let wordIsCorrectAndLocked = true;
                 for (let i = 0; i < wordObj.english.length; i++) {
@@ -977,17 +923,12 @@
                 }
             });
 
-
-            // Handle overall puzzle message
             if (allPuzzlesCorrect && totalWords > 0) {
                 showMessage("Congratulations!", "You have completed the crossword puzzle correctly!");
-                console.log(`[checkAllCells] Puzzle complete and correct!`);
             } else if (totalWords === 0) {
                 showMessage("No Words Defined", "There are no words defined in the puzzle to check.");
-                console.log(`[checkAllCells] No words defined.`);
             } else {
                 showMessage("Keep Going!", `You have ${correctWordsCount} out of ${totalWords} words correct.`);
-                console.log(`[checkAllCells] Puzzle incomplete or incorrect. Correct words: ${correctWordsCount}/${totalWords}`);
             }
         }
 
@@ -995,7 +936,6 @@
          * Clears all user input from the grid.
          */
         function clearGrid() {
-            console.log(`[clearGrid] Clearing puzzle...`);
             for (let r = 0; r < crosswordData.gridSize.rows; r++) {
                 for (let c = 0; c < crosswordData.gridSize.cols; c++) {
                     const cellData = gridCellData[r][c];
@@ -1005,14 +945,13 @@
                         const input = cellDiv.querySelector('input');
                         if (input) {
                             input.value = "";
-                            input.disabled = false; // Re-enable input
-                            cellData.value = ''; // Clear internal state
+                            input.disabled = false;
+                            cellData.value = '';
                         }
                     }
-                    // Clear all styling from all cell types
                     cellDiv.classList.remove("correct", "incorrect", "highlight-active", "current-active-cell");
-                    if (cellData) { // Ensure cellData exists before accessing isLocked
-                        cellData.isLocked = false; // Reset locked state on clear
+                    if (cellData) {
+                        cellData.isLocked = false;
                     }
                 }
             }
@@ -1021,19 +960,15 @@
             activeCol = -1;
             activeWordIndex = -1;
             showMessage("Puzzle Cleared", "All your answers have been cleared. Start fresh!");
-            console.log(`[clearGrid] Puzzle cleared.`);
         }
 
         /**
          * Displays a custom message box.
-         * @param {string} title - The title of the message.
-         * @param {string} content - The content of the message.
          */
         function showMessage(title, content) {
             messageTitle.textContent = title;
             messageContent.textContent = content;
             messageBox.classList.remove("hidden");
-            console.log(`[showMessage] Displaying message: "${title}" - "${content}"`);
         }
 
         /**
@@ -1041,7 +976,6 @@
          */
         function hideMessage() {
             messageBox.classList.add("hidden");
-            console.log(`[hideMessage] Hiding message box.`);
         }
     </script>
         <div class="mt-8 flex justify-between items-center">
