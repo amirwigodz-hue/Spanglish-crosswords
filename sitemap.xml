@@ -4,59 +4,106 @@
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
-
 
 <url>
   <loc>https://spanglishcrossword.com/</loc>
-  <lastmod>2025-08-25T08:44:27+00:00</lastmod>
+  <lastmod>2026-09-14T12:00:00+00:00</lastmod>
   <priority>1.00</priority>
 </url>
 <url>
+  <loc>https://spanglishcrossword.com/index.html</loc>
+  <lastmod>2026-09-14T12:00:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://spanglishcrossword.com/index2.html</loc>
+  <lastmod>2026-09-14T12:00:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://spanglishcrossword.com/about.html</loc>
+  <lastmod>2026-09-14T12:00:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://spanglishcrossword.com/privacy-policy.html</loc>
+  <lastmod>2026-09-14T12:00:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
   <loc>https://spanglishcrossword.com/crossword1.html</loc>
-  <lastmod>2025-08-25T08:44:27+00:00</lastmod>
+  <lastmod>2026-09-14T12:00:00+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://spanglishcrossword.com/crossword2.html</loc>
-  <lastmod>2025-08-25T08:44:27+00:00</lastmod>
+  <lastmod>2026-09-14T12:00:00+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://spanglishcrossword.com/crossword3.html</loc>
-  <lastmod>2025-08-25T08:44:27+00:00</lastmod>
+  <lastmod>2026-09-14T12:00:00+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://spanglishcrossword.com/crossword4.html</loc>
-  <lastmod>2025-08-25T08:44:27+00:00</lastmod>
+  <lastmod>2026-09-14T12:00:00+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://spanglishcrossword.com/crossword5.html</loc>
-  <lastmod>2025-08-25T08:44:27+00:00</lastmod>
+  <lastmod>2026-09-14T12:00:00+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://spanglishcrossword.com/crossword6.html</loc>
-  <lastmod>2025-08-25T08:44:27+00:00</lastmod>
+  <lastmod>2026-09-14T12:00:00+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://spanglishcrossword.com/crossword7.html</loc>
-  <lastmod>2025-08-25T08:44:27+00:00</lastmod>
+  <lastmod>2026-09-14T12:00:00+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://spanglishcrossword.com/crossword8.html</loc>
-  <lastmod>2025-08-25T08:44:27+00:00</lastmod>
+  <lastmod>2026-09-14T12:00:00+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://spanglishcrossword.com/index.html</loc>
-  <lastmod>2025-08-25T08:44:27+00:00</lastmod>
-  <priority>0.64</priority>
+  <loc>https://spanglishcrossword.com/crossword9.html</loc>
+  <lastmod>2026-09-14T12:00:00+00:00</lastmod>
+  <priority>0.80</priority>
 </url>
-
+<url>
+  <loc>https://spanglishcrossword.com/crossword10.html</loc>
+  <lastmod>2026-09-14T12:00:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://spanglishcrossword.com/crossword11.html</loc>
+  <lastmod>2026-09-14T12:00:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://spanglishcrossword.com/crossword12.html</loc>
+  <lastmod>2026-09-14T12:00:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://spanglishcrossword.com/crossword13.html</loc>
+  <lastmod>2026-09-14T12:00:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://spanglishcrossword.com/crossword14.html</loc>
+  <lastmod>2026-09-14T12:00:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://spanglishcrossword.com/crossword15.html</loc>
+  <lastmod>2026-09-14T12:00:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
 
 </urlset>
