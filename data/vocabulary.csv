@@ -7,8 +7,8 @@ acción,action,
 dirección,address,
 después,after,3
 avión,airplane,3 5 6
-todo,all,1
-todo,every,1
+todo,all,
+todo,every,
 también,also,12
 siempre,always,
 ambulancia,ambulance,
@@ -452,7 +452,7 @@ tren,train,2 14
 árbol,tree,
 camión,truck,
 dos,two,1 4 7 14
-tipo,type,1
+tipo,type,
 paragua,umbrella,
 hasta,until,
 muy,very,
@@ -502,7 +502,7 @@ arte,art,
 nunca,never,8
 compartir,share,
 ella,she,2 4
-dulce,sweet,
+dulce,sweet,2
 tía,aunt,3
 maíz,corn,
 gigante,giant,8
