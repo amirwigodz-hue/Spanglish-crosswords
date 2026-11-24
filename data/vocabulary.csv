@@ -49,7 +49,7 @@ libro,book,15
 jefe,boss,
 botella,bottle,
 caja,box,
-pan,bread,
+pan,bread,16
 respirar,breathe,
 puente,bridge,
 hermano,brother,15
@@ -140,7 +140,7 @@ pelo,hair,7
 corredor,hallway,
 pasillo,corridor,12
 mano,hand,
-felicidad,happiness,
+felicidad,happiness,16
 cabeza,head,
 corazón,heart,
 aquí,here,9
@@ -199,13 +199,13 @@ nombre,name,
 collar,necklace,
 vecino,neighbor,
 nuevo,new,2 6 12
-periódico,newspaper,
+periódico,newspaper,16
 noche,night,
 no,no,9 10 11 12
 no,not,9
 ningún,none,
 ningún,no,
-nariz,nose,13
+nariz,nose,13 16
 cuaderno,notebook,
 ahora,now,1 5 10
 enfermera,nurse,
@@ -215,7 +215,7 @@ de,from,
 oficina,office,8 13
 cebolla,onion,3 5 6 7
 sólo,only,12
-o,or,3 9 12 15
+o,or,3 9 12 15 16
 naranja,orange,8
 otro,other,9
 pantalón,pants,
@@ -235,11 +235,11 @@ policía,police,9 11 12
 cerdo,pork,
 cerdo,pig,10 14
 puerto,port,
-profesor,professor,
+profesor,professor,16
 carrera,race,10 14
 carrera,career,
 lluvia,rain,1 8
-crudo,raw,9 12
+crudo,raw,9 12 16
 listo,ready,3 8
 descansar,rest,4
 arroz,rice,1 3 11
@@ -267,7 +267,7 @@ sofá,sofa,
 tierra,soil,
 alguien,someone,9
 algo,something,
-hijo,son,
+hijo,son,16
 canción,song,4
 cuchara,spoon,1 5
 plaza,square,
@@ -277,7 +277,7 @@ piedra,stone,
 tienda,store,
 cuento,story,
 cuento,tale,10
-calle,street,
+calle,street,16
 estudiante,student,3
 azúcar,sugar,
 maleta,suitcase,
@@ -286,7 +286,7 @@ mesa,table,
 maestra,teacher,
 maestro,teacher,
 lágrima,tear,
-ese/esa,that,
+ese/esa,that,16
 aquel,that,14
 que,that,
 que,which,
@@ -307,7 +307,7 @@ estar,to be,11
 nacer,to be born,
 callar,to be quiet,
 comenzar,to begin,
-creer,to believe,9 11
+creer,to believe,9 11 16
 romper,to break,11
 construir,to build,
 comprar,to buy,2 3 6
@@ -362,7 +362,7 @@ ir,to go,3 6 10 12 13 14
 bajar,to go down,
 subir,to go up,
 crecer,to grow,
-suceder,to happen,11 14
+suceder,to happen,11 14 16
 odiar,to hate,
 haber,to have,
 tener,to have,
@@ -392,7 +392,7 @@ multiplicar,to multiply,
 necesitar,to need,
 observar,to observe,
 ocurrir,to occur,
-abrir,to open,
+abrir,to open,16
 pintar,to paint,10
 pasar,to pass,
 pagar,to pay,14
@@ -456,7 +456,7 @@ hasta,until,
 muy,very,
 cintura,waist,
 armario,wardrobe,
-almacén,warehouse,
+almacén,warehouse,16
 reloj,watch,
 agua,water,2
 tiempo,weather,
@@ -483,7 +483,7 @@ camarero,waiter,7
 fabricar,manufacture,10
 conejo,rabbit,
 recibir,receive,
-explorador,explorer,14
+explorador,explorer,14 16
 abajo,under,
 bucear,dive,
 cerebro,brain,7
@@ -578,10 +578,10 @@ Ciudadano,citizen,6
 invitar,invite,6
 blanco,white,1 6
 feo,ugly,6
-mediodía,noon,6
+mediodía,noon,6 16
 nieve,snow,6
 vaca,cow,6
-té,tea,6 8
+té,tea,6 8 16
 manejar,drive,7
 paz,peace,7 12
 fideos,noodles,7
@@ -614,7 +614,7 @@ sonrisa,smile,1
 música,music,1
 boleto,ticket,1
 aceite,oil,1 12
-uno,one,1 9 10 11
+uno,one,1 9 10 11 16
 ganar,earn,1
 ajo,garlic,1
 dios,god,1
@@ -624,7 +624,7 @@ rojo,red,
 azul,blue,
 negro,black,
 rosado,pink,
-morado,purple,
+morado,purple,16
 marrón,brown,
 caballo,horse,
 ratón,mouse,
@@ -690,7 +690,7 @@ empujar,to push,
 llevar,to carry,
 preparar,to prepare,
 cenar,to have dinner,
-desayunar,to have breakfast,
+desayunar,to have breakfast,16
 pequeño,small,
 alto,tall,
 feliz,happy,
